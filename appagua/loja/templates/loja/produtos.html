@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Produtos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .home-button {
+            margin-top: 20px;
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .home-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Produtos</h1>
+    <a href="{% url 'homepage' %}" class="home-button">Home</a>
+    <h2>Adicionar/Editar Produto</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="produto_id" id="produto_id">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome"><br>
+        <label for="status">Status:</label>
+        <input type="text" id="status" name="status"><br>
+        <label for="custo">Custo:</label>
+        <input type="number" id="custo" name="custo" step="0.01"><br>
+        <label for="marca">Marca:</label>
+        <input type="text" id="marca" name="marca"><br>
+        <label for="linha">Linha:</label>
+        <input type="text" id="linha" name="linha"><br>
+        <label for="unidade">Unidade:</label>
+        <input type="text" id="unidade" name="unidade"><br>
+        <label for="valor">Valor:</label>
+        <input type="number" id="valor" name="valor" step="0.01"><br>
+        <button type="submit">Salvar</button>
+    </form>
+    <h2>Lista de Produtos</h2>
+    <table>
+        <tr>
+            <th>Nome</th>
+            <th>Status</th>
+            <th>Custo</th>
+            <th>Marca</th>
+            <th>Linha</th>
+            <th>Unidade</th>
+            <th>Valor</th>
+            <th>Ações</th>
+        </tr>
+        {% for produto in produtos %}
+        <tr>
+            <td>{{ produto.nome }}</td>
+            <td>{{ produto.status }}</td>
+            <td>{{ produto.custo }}</td>
+            <td>{{ produto.marca }}</td>
+            <td>{{ produto.linha }}</td>
+            <td>{{ produto.unidade }}</td>
+            <td>{{ produto.valor }}</td>
+            <td>
+                <a href="#" onclick="editarProduto('{{ produto.id }}', '{{ produto.nome }}', '{{ produto.status }}', '{{ produto.custo }}', '{{ produto.marca }}', '{{ produto.linha }}', '{{ produto.unidade }}', '{{ produto.valor }}')">Editar</a> - 
+                <a href="?delete={{ produto.id }}">Excluir</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <script>
+        function editarProduto(id, nome, status, custo, marca, linha, unidade, valor) {
+            document.getElementById('produto_id').value = id;
+            document.getElementById('nome').value = nome;
+            document.getElementById('status').value = status;
+            document.getElementById('custo').value = custo;
+            document.getElementById('marca').value = marca;
+            document.getElementById('linha').value = linha;
+            document.getElementById('unidade').value = unidade;
+            document.getElementById('valor').value = valor;
+        }
+    </script>
+</body>
+</html>

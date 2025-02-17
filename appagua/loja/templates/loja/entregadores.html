@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Entregadores</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .home-button {
+            margin-top: 20px;
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .home-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Entregadores</h1>
+    <a href="{% url 'homepage' %}" class="home-button">Home</a>
+    <h2>Adicionar/Editar Entregador</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="entregador_id" id="entregador_id">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome"><br>
+        <label for="sobrenome">Sobrenome:</label>
+        <input type="text" id="sobrenome" name="sobrenome"><br>
+        <label for="telefone">Telefone:</label>
+        <input type="text" id="telefone" name="telefone"><br>
+        <button type="submit">Salvar</button>
+    </form>
+    <h2>Lista de Entregadores</h2>
+    <table>
+        <tr>
+            <th>Nome</th>
+            <th>Sobrenome</th>
+            <th>Telefone</th>
+            <th>Ações</th>
+        </tr>
+        {% for entregador in entregadores %}
+        <tr>
+            <td>{{ entregador.nome }}</td>
+            <td>{{ entregador.sobrenome }}</td>
+            <td>{{ entregador.telefone }}</td>
+            <td>
+                <a href="#" onclick="editarEntregador('{{ entregador.id }}', '{{ entregador.nome }}', '{{ entregador.sobrenome }}', '{{ entregador.telefone }}')">Editar</a> - 
+                <a href="?delete={{ entregador.id }}">Excluir</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <script>
+        function editarEntregador(id, nome, sobrenome, telefone) {
+            document.getElementById('entregador_id').value = id;
+            document.getElementById('nome').value = nome;
+            document.getElementById('sobrenome').value = sobrenome;
+            document.getElementById('telefone').value = telefone;
+        }
+    </script>
+</body>
+</html>
