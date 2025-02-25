@@ -82,19 +82,25 @@
     <h2>Adicionar/Editar Pedido</h2>
     <form method="post">
         {% csrf_token %}
-        <input type="hidden" name="pedido_id" id="pedido_id">
+        <input type="hidden" name="pedido_id" id="pedido_id" value="{{ pedido_edit.id|default:'' }}">
 
         <label for="data_solicitacao">Data:</label>
-        <input type="date" name="data_solicitacao" id="data_solicitacao" required>
+        <input type="date" name="data_solicitacao" id="data_solicitacao" 
+            value="{{ pedido_edit.data_solicitacao|date:'Y-m-d' }}" 
+            {% if not pedido_edit %}required{% endif %}>
 
         <label for="hora_solicitacao">Hora:</label>
-        <input type="time" name="hora_solicitacao" id="hora_solicitacao" required>
-
-        <label for="valor_total">Valor Total:</label>
-        <input type="number" name="valor_total" id="valor_total" step="0.01" required>
+        <input type="time" name="hora_solicitacao" id="hora_solicitacao" 
+            value="{{ pedido_edit.hora_solicitacao|time:'H:i' }}" 
+            {% if not pedido_edit %}required{% endif %}>
 
         <label for="status">Status:</label>
-        <input type="text" name="status" id="status" required>
+        <select name="status" id="status">
+            <option value="Pendente">Pendente</option>
+            <option value="Em andamento">Em andamento</option>
+            <option value="Concluído">Concluído</option>
+            <option value="Cancelado">Cancelado</option>
+        </select>
 
         <label for="id_cliente">Cliente:</label>
         <select name="id_cliente" id="id_cliente">
@@ -147,25 +153,15 @@
             <td>{{ pedido.id }}</td>
             <td>{{ pedido.data_solicitacao }}</td>
             <td>{{ pedido.hora_solicitacao }}</td>
-            <td>{{ pedido.valor_total }}</td>
+            <td>R$ {{ pedido.valor_total|default:"0.00" }}</td>
             <td>{{ pedido.status }}</td>
             <td>{{ pedido.cliente }}</td>
             <td>{{ pedido.entregador }}</td>
             <td>{{ pedido.lista_pedidos }}</td>
             <td>{{ pedido.cupom|default:"Nenhum" }}</td>
             <td>
-                <a href="#" onclick="editarPedido(
-                    '{{ pedido.id }}',
-                    '{{ pedido.data_solicitacao }}',
-                    '{{ pedido.hora_solicitacao }}',
-                    '{{ pedido.valor_total }}',
-                    '{{ pedido.status }}',
-                    '{{ pedido.cliente }}',
-                    '{{ pedido.entregador }}',
-                    '{{ pedido.lista_pedidos }}',
-                    '{{ pedido.cupom }}'
-                )">Editar</a> -
-                <a href="?delete={{ pedido.id }}">Excluir</a>
+                <a href="?edit={{ pedido.id }}">Editar</a> -
+                <a href="?delete={{ pedido.id }}" style="color: red;">Excluir</a>
             </td>
         </tr>
         {% endfor %}

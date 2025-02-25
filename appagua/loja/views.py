@@ -254,31 +254,46 @@ def listar_produtos_contidos(request):
         'produtos': produtos
     })
 
-
-
 # View para listar, adicionar, editar e remover pedidos
 def listar_pedidos(request):
+    pedido_edit = None  # Para armazenar o pedido a ser editado
+
     if request.method == 'POST':
         pedido_id = request.POST.get('pedido_id')
         data_solicitacao = request.POST.get('data_solicitacao')
         hora_solicitacao = request.POST.get('hora_solicitacao')
-        valor_total = request.POST.get('valor_total')
         status = request.POST.get('status')
         id_cliente = request.POST.get('id_cliente')
         id_entregador = request.POST.get('id_entregador')
         id_cupom = request.POST.get('id_cupom') or None
         id_lista_pedidos = request.POST.get('id_lista_pedidos')
 
-        if pedido_id:  # Se houver um ID, significa que estamos editando um pedido existente
+        # Recalcular o valor total com base nos produtos na lista de pedidos
+        query_total = """
+            SELECT SUM(pc.valor * pc.quantidade) AS valor_total
+            FROM loja_produtoscontidos pc
+            WHERE pc.id_lista_pedidos_id = %s
+        """
+        resultado = execute_sql(query_total, [id_lista_pedidos])
+        valor_total = resultado[0]['valor_total'] if resultado and resultado[0]['valor_total'] else 0.00
+
+        if pedido_id:  # Se o ID existe, EDITAR pedido
             query = """
                 UPDATE loja_pedido 
-                SET data_solicitacao=%s, hora_solicitacao=%s, valor_total=%s, status=%s, 
-                    id_cliente_id=%s, id_entregador_id=%s, id_cupom_id=%s, id_lista_pedidos_id=%s
+                SET data_solicitacao=%s, 
+                    hora_solicitacao=%s, 
+                    valor_total=%s, 
+                    status=%s, 
+                    id_cliente_id=%s, 
+                    id_entregador_id=%s, 
+                    id_cupom_id=%s, 
+                    id_lista_pedidos_id=%s
                 WHERE id=%s
             """
             params = (data_solicitacao, hora_solicitacao, valor_total, status, 
                       id_cliente, id_entregador, id_cupom, id_lista_pedidos, pedido_id)
-        else:  # Se não houver ID, estamos criando um novo pedido
+            execute_sql(query, params)
+        else:  # Se o ID **NÃO** existe, CRIAR pedido
             query = """
                 INSERT INTO loja_pedido (data_solicitacao, hora_solicitacao, valor_total, status, 
                                          id_cliente_id, id_entregador_id, id_cupom_id, id_lista_pedidos_id)
@@ -286,16 +301,37 @@ def listar_pedidos(request):
             """
             params = (data_solicitacao, hora_solicitacao, valor_total, status, 
                       id_cliente, id_entregador, id_cupom, id_lista_pedidos)
+            execute_sql(query, params)
 
-        execute_sql(query, params)
         return redirect('listar_pedidos')
 
-    if 'delete' in request.GET:
+    if 'delete' in request.GET:  # Excluir pedido
         pedido_id = request.GET.get('delete')
         query = "DELETE FROM loja_pedido WHERE id=%s"
         execute_sql(query, [pedido_id])
         return redirect('listar_pedidos')
 
+    if 'edit' in request.GET:  # Editar pedido (Preencher formulário)
+        pedido_id = request.GET.get('edit')
+        query = """
+            SELECT id, data_solicitacao, hora_solicitacao, valor_total, status, 
+                   id_cliente_id, id_entregador_id, id_lista_pedidos_id, id_cupom_id 
+            FROM loja_pedido WHERE id=%s
+        """
+        pedido_edit = execute_sql(query, [pedido_id])
+        if pedido_edit:
+            pedido_edit = pedido_edit[0]  # Pegamos o primeiro resultado da lista
+
+            # Calcular o valor total baseado nos produtos da lista de pedidos
+            query_total = """
+                SELECT SUM(pc.valor * pc.quantidade) AS valor_total
+                FROM loja_produtoscontidos pc
+                WHERE pc.id_lista_pedidos_id = %s
+            """
+            resultado = execute_sql(query_total, [pedido_edit['id_lista_pedidos_id']])
+            pedido_edit['valor_total'] = resultado[0]['valor_total'] if resultado and resultado[0]['valor_total'] else 0.00
+
+    # Buscar todos os pedidos
     query = """
         SELECT p.id, p.data_solicitacao, p.hora_solicitacao, p.valor_total, p.status,
                c.nome AS cliente, e.nome AS entregador, l.id AS lista_pedidos, cp.id AS cupom
@@ -319,9 +355,9 @@ def listar_pedidos(request):
         'clientes': clientes,
         'entregadores': entregadores,
         'listas_pedidos': listas_pedidos,
-        'cupons': cupons
+        'cupons': cupons,
+        'pedido_edit': pedido_edit  # Passando o pedido a ser editado para o template
     })
-
 
 def homepage(request):
     return render(request, 'loja/homepage.html')
