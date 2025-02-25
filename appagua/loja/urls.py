@@ -15,4 +15,6 @@ urlpatterns = [
     path('listapedidos/', views.listar_listapedidos, name='listar_listapedidos'),
     # URLs para ProdutosContidos
     path('produtoscontidos/', views.listar_produtos_contidos, name='listar_produtos_contidos'),
+    # URLs para Pedidos
+    path('pedidos/', views.listar_pedidos, name='listar_pedidos'),
 ]

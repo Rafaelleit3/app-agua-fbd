@@ -254,5 +254,74 @@ def listar_produtos_contidos(request):
         'produtos': produtos
     })
 
+
+
+# View para listar, adicionar, editar e remover pedidos
+def listar_pedidos(request):
+    if request.method == 'POST':
+        pedido_id = request.POST.get('pedido_id')
+        data_solicitacao = request.POST.get('data_solicitacao')
+        hora_solicitacao = request.POST.get('hora_solicitacao')
+        valor_total = request.POST.get('valor_total')
+        status = request.POST.get('status')
+        id_cliente = request.POST.get('id_cliente')
+        id_entregador = request.POST.get('id_entregador')
+        id_cupom = request.POST.get('id_cupom') or None
+        id_lista_pedidos = request.POST.get('id_lista_pedidos')
+
+        if pedido_id:  # Se houver um ID, significa que estamos editando um pedido existente
+            query = """
+                UPDATE loja_pedido 
+                SET data_solicitacao=%s, hora_solicitacao=%s, valor_total=%s, status=%s, 
+                    id_cliente_id=%s, id_entregador_id=%s, id_cupom_id=%s, id_lista_pedidos_id=%s
+                WHERE id=%s
+            """
+            params = (data_solicitacao, hora_solicitacao, valor_total, status, 
+                      id_cliente, id_entregador, id_cupom, id_lista_pedidos, pedido_id)
+        else:  # Se não houver ID, estamos criando um novo pedido
+            query = """
+                INSERT INTO loja_pedido (data_solicitacao, hora_solicitacao, valor_total, status, 
+                                         id_cliente_id, id_entregador_id, id_cupom_id, id_lista_pedidos_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            params = (data_solicitacao, hora_solicitacao, valor_total, status, 
+                      id_cliente, id_entregador, id_cupom, id_lista_pedidos)
+
+        execute_sql(query, params)
+        return redirect('listar_pedidos')
+
+    if 'delete' in request.GET:
+        pedido_id = request.GET.get('delete')
+        query = "DELETE FROM loja_pedido WHERE id=%s"
+        execute_sql(query, [pedido_id])
+        return redirect('listar_pedidos')
+
+    query = """
+        SELECT p.id, p.data_solicitacao, p.hora_solicitacao, p.valor_total, p.status,
+               c.nome AS cliente, e.nome AS entregador, l.id AS lista_pedidos, cp.id AS cupom
+        FROM loja_pedido p
+        JOIN loja_cliente c ON p.id_cliente_id = c.id
+        JOIN loja_entregador e ON p.id_entregador_id = e.id
+        JOIN loja_listapedidos l ON p.id_lista_pedidos_id = l.id
+        LEFT JOIN loja_cupom cp ON p.id_cupom_id = cp.id
+        ORDER BY p.data_solicitacao DESC, p.hora_solicitacao DESC
+    """
+    pedidos = execute_sql(query)
+
+    # Buscar opções para dropdowns
+    clientes = execute_sql("SELECT id, nome FROM loja_cliente")
+    entregadores = execute_sql("SELECT id, nome FROM loja_entregador")
+    listas_pedidos = execute_sql("SELECT id FROM loja_listapedidos")
+    cupons = execute_sql("SELECT id FROM loja_cupom")
+
+    return render(request, 'loja/pedidos.html', {
+        'pedidos': pedidos,
+        'clientes': clientes,
+        'entregadores': entregadores,
+        'listas_pedidos': listas_pedidos,
+        'cupons': cupons
+    })
+
+
 def homepage(request):
     return render(request, 'loja/homepage.html')

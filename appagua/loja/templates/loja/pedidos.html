@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pedidos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .home-button {
+            margin-top: 20px;
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .home-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gerenciamento de Pedidos</h1>
+    <a href="{% url 'homepage' %}" class="home-button">Home</a>
+
+    <h2>Adicionar/Editar Pedido</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="pedido_id" id="pedido_id">
+
+        <label for="data_solicitacao">Data:</label>
+        <input type="date" name="data_solicitacao" id="data_solicitacao" required>
+
+        <label for="hora_solicitacao">Hora:</label>
+        <input type="time" name="hora_solicitacao" id="hora_solicitacao" required>
+
+        <label for="valor_total">Valor Total:</label>
+        <input type="number" name="valor_total" id="valor_total" step="0.01" required>
+
+        <label for="status">Status:</label>
+        <input type="text" name="status" id="status" required>
+
+        <label for="id_cliente">Cliente:</label>
+        <select name="id_cliente" id="id_cliente">
+            {% for cliente in clientes %}
+                <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="id_entregador">Entregador:</label>
+        <select name="id_entregador" id="id_entregador">
+            {% for entregador in entregadores %}
+                <option value="{{ entregador.id }}">{{ entregador.nome }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="id_lista_pedidos">Lista de Pedidos:</label>
+        <select name="id_lista_pedidos" id="id_lista_pedidos">
+            {% for lista in listas_pedidos %}
+                <option value="{{ lista.id }}">{{ lista.id }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="id_cupom">Cupom (Opcional):</label>
+        <select name="id_cupom" id="id_cupom">
+            <option value="">Nenhum</option>
+            {% for cupom in cupons %}
+                <option value="{{ cupom.id }}">{{ cupom.id }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Salvar</button>
+    </form>
+
+    <h2>Lista de Pedidos</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Hora</th>
+            <th>Valor Total</th>
+            <th>Status</th>
+            <th>Cliente</th>
+            <th>Entregador</th>
+            <th>Lista de Pedidos</th>
+            <th>Cupom</th>
+            <th>Ações</th>
+        </tr>
+        {% for pedido in pedidos %}
+        <tr>
+            <td>{{ pedido.id }}</td>
+            <td>{{ pedido.data_solicitacao }}</td>
+            <td>{{ pedido.hora_solicitacao }}</td>
+            <td>{{ pedido.valor_total }}</td>
+            <td>{{ pedido.status }}</td>
+            <td>{{ pedido.cliente }}</td>
+            <td>{{ pedido.entregador }}</td>
+            <td>{{ pedido.lista_pedidos }}</td>
+            <td>{{ pedido.cupom|default:"Nenhum" }}</td>
+            <td>
+                <a href="#" onclick="editarPedido(
+                    '{{ pedido.id }}',
+                    '{{ pedido.data_solicitacao }}',
+                    '{{ pedido.hora_solicitacao }}',
+                    '{{ pedido.valor_total }}',
+                    '{{ pedido.status }}',
+                    '{{ pedido.cliente }}',
+                    '{{ pedido.entregador }}',
+                    '{{ pedido.lista_pedidos }}',
+                    '{{ pedido.cupom }}'
+                )">Editar</a> -
+                <a href="?delete={{ pedido.id }}">Excluir</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <script>
+        function editarPedido(id, data, hora, valor, status, cliente, entregador, lista, cupom) {
+            document.getElementById('pedido_id').value = id;
+            document.getElementById('data_solicitacao').value = data;
+            document.getElementById('hora_solicitacao').value = hora;
+            document.getElementById('valor_total').value = valor;
+            document.getElementById('status').value = status;
+            document.getElementById('id_cliente').value = cliente;
+            document.getElementById('id_entregador').value = entregador;
+            document.getElementById('id_lista_pedidos').value = lista;
+            document.getElementById('id_cupom').value = cupom;
+        }
+    </script>
+</body>
+</html>
