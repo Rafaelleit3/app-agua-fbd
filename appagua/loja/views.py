@@ -178,5 +178,30 @@ def listar_produtos(request):
     produtos = execute_sql(query)
     return render(request, 'loja/produtos.html', {'produtos': produtos})
 
+# CRUD para ListaPedidos
+def listar_listapedidos(request):
+    if request.method == 'POST':
+        listapedidos_id = request.POST.get('listapedidos_id')
+
+        if listapedidos_id:  # Edição
+            query = "UPDATE loja_listapedidos SET id=%s WHERE id=%s"
+            params = (listapedidos_id, listapedidos_id)
+        else:  # Criação
+            query = "INSERT INTO loja_listapedidos DEFAULT VALUES"
+            params = None
+
+        execute_sql(query, params)
+        return redirect('listar_listapedidos')
+
+    if 'delete' in request.GET:
+        listapedidos_id = request.GET.get('delete')
+        query = "DELETE FROM loja_listapedidos WHERE id=%s"
+        execute_sql(query, [listapedidos_id])
+        return redirect('listar_listapedidos')
+
+    query = "SELECT id FROM loja_listapedidos"
+    listapedidos = execute_sql(query)
+    return render(request, 'loja/listapedidos.html', {'listapedidos': listapedidos})
+
 def homepage(request):
     return render(request, 'loja/homepage.html')

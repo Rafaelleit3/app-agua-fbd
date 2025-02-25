@@ -11,4 +11,6 @@ urlpatterns = [
     path('entregadores/', views.listar_entregadores, name='listar_entregadores'),
     # URLs para Produto
     path('produtos/', views.listar_produtos, name='listar_produtos'),
+    # URLs para ListaPedidos
+    path('listapedidos/', views.listar_listapedidos, name='listar_listapedidos'),
 ]
