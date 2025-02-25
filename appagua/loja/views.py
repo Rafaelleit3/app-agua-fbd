@@ -203,5 +203,56 @@ def listar_listapedidos(request):
     listapedidos = execute_sql(query)
     return render(request, 'loja/listapedidos.html', {'listapedidos': listapedidos})
 
+# View para listar, adicionar e remover produtos contidos em uma lista de pedidos
+def listar_produtos_contidos(request):
+    if request.method == 'POST':
+        id_lista_pedidos = request.POST.get('id_lista_pedidos')
+        id_produto = request.POST.get('id_produto')
+        valor = request.POST.get('valor')
+        quantidade = request.POST.get('quantidade')
+
+        if id_lista_pedidos and id_produto and valor and quantidade:
+            query = """
+                INSERT INTO loja_produtoscontidos (id_lista_pedidos_id, id_produto_id, valor, quantidade)
+                VALUES (%s, %s, %s, %s)
+            """
+            params = (id_lista_pedidos, id_produto, valor, quantidade)
+            execute_sql(query, params)
+
+        return redirect('listar_produtos_contidos')
+
+    if 'delete' in request.GET:
+        produto_id = request.GET.get('delete')
+        lista_id = request.GET.get('lista_id')
+
+        query = """
+            DELETE FROM loja_produtoscontidos 
+            WHERE id_lista_pedidos_id = %s AND id_produto_id = %s
+        """
+        execute_sql(query, [lista_id, produto_id])
+        return redirect('listar_produtos_contidos')
+
+    query = """
+        SELECT pc.id_lista_pedidos_id, pc.id_produto_id, p.nome, pc.valor, pc.quantidade 
+        FROM loja_produtoscontidos pc
+        JOIN loja_produto p ON pc.id_produto_id = p.id
+        ORDER BY pc.id_lista_pedidos_id, p.nome
+    """
+    produtos_contidos = execute_sql(query)
+
+    # Buscar todas as listas de pedidos para exibição no formulário
+    query_listas = "SELECT id FROM loja_listapedidos"
+    listas_pedidos = execute_sql(query_listas)
+
+    # Buscar todos os produtos para exibição no formulário
+    query_produtos = "SELECT id, nome FROM loja_produto"
+    produtos = execute_sql(query_produtos)
+
+    return render(request, 'loja/produtos_contidos.html', {
+        'produtos_contidos': produtos_contidos,
+        'listas_pedidos': listas_pedidos,
+        'produtos': produtos
+    })
+
 def homepage(request):
     return render(request, 'loja/homepage.html')

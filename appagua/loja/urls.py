@@ -13,4 +13,6 @@ urlpatterns = [
     path('produtos/', views.listar_produtos, name='listar_produtos'),
     # URLs para ListaPedidos
     path('listapedidos/', views.listar_listapedidos, name='listar_listapedidos'),
+    # URLs para ProdutosContidos
+    path('produtoscontidos/', views.listar_produtos_contidos, name='listar_produtos_contidos'),
 ]
