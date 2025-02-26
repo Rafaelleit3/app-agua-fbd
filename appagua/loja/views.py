@@ -257,6 +257,55 @@ def listar_produtos_contidos(request):
 # View para listar, adicionar, editar e remover pedidos
 def listar_pedidos(request):
     pedido_edit = None  # Para armazenar o pedido a ser editado
+    filtros = []
+    params = []
+
+    # Capturar filtros da URL (GET)
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
+    status = request.GET.get('status')
+    id_cliente = request.GET.get('id_cliente')
+    id_entregador = request.GET.get('id_entregador')
+
+    # Construindo a query base com JOINs necessários
+    query = """
+        SELECT p.id, p.data_solicitacao, p.hora_solicitacao, p.valor_total, p.status,
+               c.nome AS cliente, e.nome AS entregador, l.id AS lista_pedidos, cp.id AS cupom
+        FROM loja_pedido p
+        JOIN loja_cliente c ON p.id_cliente_id = c.id
+        JOIN loja_entregador e ON p.id_entregador_id = e.id
+        JOIN loja_listapedidos l ON p.id_lista_pedidos_id = l.id
+        LEFT JOIN loja_cupom cp ON p.id_cupom_id = cp.id
+    """
+
+    # Aplicando filtros dinamicamente
+    if data_inicio:
+        filtros.append("p.data_solicitacao >= %s")
+        params.append(data_inicio)
+    
+    if data_fim:
+        filtros.append("p.data_solicitacao <= %s")
+        params.append(data_fim)
+
+    if status:
+        filtros.append("p.status = %s")
+        params.append(status)
+
+    if id_cliente:
+        filtros.append("p.id_cliente_id = %s")
+        params.append(id_cliente)
+
+    if id_entregador:
+        filtros.append("p.id_entregador_id = %s")
+        params.append(id_entregador)
+
+    # Se houver filtros, adiciona o WHERE na query
+    if filtros:
+        query += " WHERE " + " AND ".join(filtros)
+
+    query += " ORDER BY p.data_solicitacao DESC, p.hora_solicitacao DESC"
+
+    pedidos = execute_sql(query, params)
 
     if request.method == 'POST':
         pedido_id = request.POST.get('pedido_id')
@@ -331,19 +380,6 @@ def listar_pedidos(request):
             resultado = execute_sql(query_total, [pedido_edit['id_lista_pedidos_id']])
             pedido_edit['valor_total'] = resultado[0]['valor_total'] if resultado and resultado[0]['valor_total'] else 0.00
 
-    # Buscar todos os pedidos
-    query = """
-        SELECT p.id, p.data_solicitacao, p.hora_solicitacao, p.valor_total, p.status,
-               c.nome AS cliente, e.nome AS entregador, l.id AS lista_pedidos, cp.id AS cupom
-        FROM loja_pedido p
-        JOIN loja_cliente c ON p.id_cliente_id = c.id
-        JOIN loja_entregador e ON p.id_entregador_id = e.id
-        JOIN loja_listapedidos l ON p.id_lista_pedidos_id = l.id
-        LEFT JOIN loja_cupom cp ON p.id_cupom_id = cp.id
-        ORDER BY p.data_solicitacao DESC, p.hora_solicitacao DESC
-    """
-    pedidos = execute_sql(query)
-
     # Buscar opções para dropdowns
     clientes = execute_sql("SELECT id, nome FROM loja_cliente")
     entregadores = execute_sql("SELECT id, nome FROM loja_entregador")
@@ -358,6 +394,7 @@ def listar_pedidos(request):
         'cupons': cupons,
         'pedido_edit': pedido_edit  # Passando o pedido a ser editado para o template
     })
+
 
 def homepage(request):
     return render(request, 'loja/homepage.html')

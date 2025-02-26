@@ -167,6 +167,47 @@
         {% endfor %}
     </table>
 
+    <h2>Filtrar Pedidos</h2>
+    <form method="GET">
+        <label for="data_inicio">Data Início:</label>
+        <input type="date" name="data_inicio" id="data_inicio" value="{{ request.GET.data_inicio }}">
+
+        <label for="data_fim">Data Fim:</label>
+        <input type="date" name="data_fim" id="data_fim" value="{{ request.GET.data_fim }}">
+
+        <label for="status">Status:</label>
+        <select name="status" id="status">
+            <option value="">Todos</option>
+            <option value="Pendente" {% if request.GET.status == "Pendente" %}selected{% endif %}>Pendente</option>
+            <option value="Em andamento" {% if request.GET.status == "Em andamento" %}selected{% endif %}>Em andamento</option>
+            <option value="Concluído" {% if request.GET.status == "Concluído" %}selected{% endif %}>Concluído</option>
+            <option value="Cancelado" {% if request.GET.status == "Cancelado" %}selected{% endif %}>Cancelado</option>
+        </select>
+
+        <label for="id_cliente">Cliente:</label>
+        <select name="id_cliente" id="id_cliente">
+            <option value="">Todos</option>
+            {% for cliente in clientes %}
+                <option value="{{ cliente.id }}" {% if request.GET.id_cliente == cliente.id|stringformat:"s" %}selected{% endif %}>
+                    {{ cliente.nome }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label for="id_entregador">Entregador:</label>
+        <select name="id_entregador" id="id_entregador">
+            <option value="">Todos</option>
+            {% for entregador in entregadores %}
+                <option value="{{ entregador.id }}" {% if request.GET.id_entregador == entregador.id|stringformat:"s" %}selected{% endif %}>
+                    {{ entregador.nome }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Filtrar</button>
+    </form>
+
+
     <script>
         function editarPedido(id, data, hora, valor, status, cliente, entregador, lista, cupom) {
             document.getElementById('pedido_id').value = id;
