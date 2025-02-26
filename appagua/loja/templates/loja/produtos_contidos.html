@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Produtos Contidos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .home-button {
+            margin-top: 20px;
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .home-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Produtos Contidos nas Listas de Pedidos</h1>
+    <a href="{% url 'homepage' %}" class="home-button">Home</a>
+    
+    <h2>Adicionar Produto a uma Lista de Pedidos</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label for="id_lista_pedidos">Lista de Pedidos:</label>
+        <select name="id_lista_pedidos" id="id_lista_pedidos">
+            {% for lista in listas_pedidos %}
+                <option value="{{ lista.id }}">{{ lista.id }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="id_produto">Produto:</label>
+        <select name="id_produto" id="id_produto">
+            {% for produto in produtos %}
+                <option value="{{ produto.id }}">{{ produto.nome }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="valor">Valor:</label>
+        <input type="number" name="valor" id="valor" step="0.01" required>
+
+        <label for="quantidade">Quantidade:</label>
+        <input type="number" name="quantidade" id="quantidade" required>
+
+        <button type="submit">Adicionar</button>
+    </form>
+
+    <h2>Lista de Produtos Contidos</h2>
+    <table>
+        <tr>
+            <th>ID Lista</th>
+            <th>Produto</th>
+            <th>Valor</th>
+            <th>Quantidade</th>
+            <th>Ações</th>
+        </tr>
+        {% for item in produtos_contidos %}
+        <tr>
+            <td>{{ item.id_lista_pedidos_id }}</td>
+            <td>{{ item.nome }}</td>
+            <td>{{ item.valor }}</td>
+            <td>{{ item.quantidade }}</td>
+            <td>
+                <a href="?delete={{ item.id_produto_id }}&lista_id={{ item.id_lista_pedidos_id }}">Remover</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
