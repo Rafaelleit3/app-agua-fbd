@@ -1,5 +1,7 @@
 # Projeto de Controle de Pedidos de Água
 
+### Trabalho desenvolvido para disciplina de fundamentos de banco de dados (FBD), UFC - quixadá - 2024.2
+
 ## Configuração do Ambiente
 
 1. Clone o repositório:
